@@ -8,17 +8,16 @@ import Product from './models/Product.js';
 
 dotenv.config();
 const app = express();
-// const port = 5000;
 
+// --- CORS CONFIGURATION ---
 const allowedOrigins = [
-//   "http://localhost:5173",
-//   "http://localhost:5174",
-  "https://chatbot-integration-client.vercel.app/",
-  "https://chatbot-integration-aircloud.vercel.app/"
+  "https://chatbot-integration-client.vercel.app", 
+  "https://chatbot-integration-aircloud.vercel.app",
+  "http://localhost:5173" 
 ];
 
 app.use(cors({
-    origin: (origin, callback) => {
+  origin: (origin, callback) => {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
@@ -31,7 +30,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
 app.use(express.static('public'));
 
 const API_KEY = process.env.GEMINI_API_KEY;
@@ -43,7 +41,7 @@ mongoose.connect(MONGO_URI)
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// --- STATIC KNOWLEDGE (Policies, FAQs)
+// --- STATIC KNOWLEDGE ---
 const STATIC_CONTEXT = `
 YOU ARE: The Customer Support AI for "AirCloud Store".
 TONE: Professional, polite, UK English.
@@ -54,6 +52,8 @@ ROLE: Assist customers with products, shipping, and returns.
 - Returns: 14 days if unused. Customer pays postage.
 - Issues: Report damaged items within 48h with photos.
 `;
+
+// --- ROUTES ---
 
 app.post('/api/products', async (req, res) => {
     try {
@@ -75,24 +75,19 @@ app.post('/api/chat', async (req, res) => {
     const currentSession = sessionId || "guest";
 
     try {
-        // 1. FETCH PRODUCTS FROM DB
         const products = await Product.find();
         
-        // 2. FORMAT THEM FOR THE AI
         let productListText = "CURRENT PRODUCT INVENTORY:\n";
         products.forEach(p => {
             productListText += `- ${p.name} (${p.price}): ${p.description}\n`;
         });
 
-        // 3. COMBINE EVERYTHING
-        // Policies + Live Product List + User Question
         const fullPrompt = `${STATIC_CONTEXT}\n\n${productListText}\n\nUSER QUESTION: ${message}`;
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(fullPrompt);
         const text = result.response.text();
 
-        // Save Chat
         await ChatLog.create({
             sessionId: currentSession,
             userMessage: message,
@@ -114,17 +109,13 @@ app.get('/api/logs', async (req, res) => {
     res.json(logs);
 });
 
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
-
+// Root Route (Fixes the 404 on homepage)
 app.get('/', (req, res) => {
     res.send('Server is Ready! API is running at /api/chat');
 });
 
 export default app;
 
-// Only run the server locally if not in production
 if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT || 5000;
     app.listen(port, () => {
