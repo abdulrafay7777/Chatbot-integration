@@ -98,3 +98,13 @@ app.get('/api/logs', async (req, res) => {
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
+
+export default app;
+
+// Only run the server locally if not in production
+if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT || 5000;
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
+}
