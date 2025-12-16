@@ -112,7 +112,6 @@ app.get('/api/logs', async (req, res) => {
     res.json(logs);
 });
 
-// Root Route (Fixes the 404 on homepage)
 app.get('/', (req, res) => {
     res.send('Server is Ready! API is running at /api/chat');
 });
