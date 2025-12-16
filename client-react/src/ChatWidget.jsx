@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import './widget.css'; 
 
-// const API_URL = "https://aircloud-bot-api.onrender.com/api/chat"; // Render URL
-const API_URI = "http://localhost:5000/api/chat";
+const API_URL = "https://chatbot-integration-aircloud.vercel.app/";
+// const API_URI = "http://localhost:5000/api/chat";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +38,7 @@ export default function ChatWidget() {
     setInput("");
 
     try {
-      const response = await fetch(API_URI, {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: input, sessionId })
