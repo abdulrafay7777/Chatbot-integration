@@ -118,6 +118,10 @@ app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
 
+app.get('/', (req, res) => {
+    res.send('Server is Ready! API is running at /api/chat');
+});
+
 export default app;
 
 // Only run the server locally if not in production
