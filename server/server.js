@@ -8,9 +8,28 @@ import Product from './models/Product.js';
 
 dotenv.config();
 const app = express();
-const port = 5000;
+// const port = 5000;
 
-app.use(cors());
+const allowedOrigins = [
+//   "http://localhost:5173",
+//   "http://localhost:5174",
+  "https://chatbot-integration-client.vercel.app/",
+  "https://chatbot-integration-aircloud.vercel.app/"
+];
+
+app.use(cors({
+    origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  methods: ["GET", "POST", "OPTIONS"],
+  credentials: true
+}));
+
 app.use(express.json());
 
 app.use(express.static('public'));
