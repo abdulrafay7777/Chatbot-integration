@@ -3,8 +3,8 @@ import cors from 'cors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import ChatLog from './models/ChatLogs.js';
-import Product from './models/Product.js'; 
+import ChatLog from '../models/ChatLogs.js';
+import Product from '../models/Product.js'; 
 
 dotenv.config();
 const app = express();
