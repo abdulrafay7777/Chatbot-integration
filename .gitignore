@@ -14,3 +14,5 @@ client-react/dist/
 # System Files 
 .DS_Store
 Thumbs.db
+
+client-react/dist
