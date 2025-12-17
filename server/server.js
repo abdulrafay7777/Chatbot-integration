@@ -9,26 +9,22 @@ import Product from './models/Product.js';
 dotenv.config();
 const app = express();
 
-// --- CORS CONFIGURATION ---
-const allowedOrigins = [
-  "https://chatbot-integration-client.vercel.app", 
-  "https://chatbot-integration-aircloud.vercel.app",
-  "http://localhost:5173" 
-];
-
+// --- 1. FIXED CORS SECTION ---
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
 
-    if (
-      origin === "https://chatbot-integration-client.vercel.app" || 
-      origin.includes(".vercel.app")
-    ) {
+    // Allow your Vercel domains (Client & Preview)
+    // We use .includes to match both the main site and the random preview links
+    if (origin.includes("chatbot-integration-client") || origin.includes("localhost")) {
       return callback(null, true);
     }
 
-    return callback(null, true); 
+    // Default: Allow it (safest for debugging)
+    return callback(null, true);
   },
+  methods: ["GET", "POST", "OPTIONS"],
   credentials: true
 }));
 
@@ -38,13 +34,17 @@ app.use(express.static('public'));
 const API_KEY = process.env.GEMINI_API_KEY;
 const MONGO_URI = process.env.MONGO_URI;
 
-mongoose.connect(MONGO_URI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch(err => console.error("MongoDB Error:", err));
+// Connect to MongoDB
+if (MONGO_URI) {
+    mongoose.connect(MONGO_URI)
+        .then(() => console.log("Connected to MongoDB"))
+        .catch(err => console.error("MongoDB Error:", err));
+} else {
+    console.error("MONGO_URI is missing in Environment Variables!");
+}
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// --- STATIC KNOWLEDGE ---
 const STATIC_CONTEXT = `
 YOU ARE: The Customer Support AI for "AirCloud Store".
 TONE: Professional, polite, UK English.
@@ -57,6 +57,9 @@ ROLE: Assist customers with products, shipping, and returns.
 `;
 
 // --- ROUTES ---
+app.get('/', (req, res) => {
+    res.send('Backend is running! API is at /api/chat');
+});
 
 app.post('/api/products', async (req, res) => {
     try {
@@ -69,8 +72,12 @@ app.post('/api/products', async (req, res) => {
 });
 
 app.get('/api/products', async (req, res) => {
-    const products = await Product.find();
-    res.json(products);
+    try {
+        const products = await Product.find();
+        res.json(products);
+    } catch (error) {
+        res.json([]);
+    }
 });
 
 app.post('/api/chat', async (req, res) => {
@@ -78,24 +85,32 @@ app.post('/api/chat', async (req, res) => {
     const currentSession = sessionId || "guest";
 
     try {
-        const products = await Product.find();
-        
+        // Safe fetch of products
         let productListText = "CURRENT PRODUCT INVENTORY:\n";
-        products.forEach(p => {
-            productListText += `- ${p.name} (${p.price}): ${p.description}\n`;
-        });
+        try {
+            const products = await Product.find();
+            products.forEach(p => {
+                productListText += `- ${p.name} (${p.price}): ${p.description}\n`;
+            });
+        } catch (e) {
+            console.log("Could not fetch products for context");
+        }
 
         const fullPrompt = `${STATIC_CONTEXT}\n\n${productListText}\n\nUSER QUESTION: ${message}`;
-
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(fullPrompt);
         const text = result.response.text();
 
-        await ChatLog.create({
-            sessionId: currentSession,
-            userMessage: message,
-            botReply: text
-        });
+        // Safe save log
+        try {
+            await ChatLog.create({
+                sessionId: currentSession,
+                userMessage: message,
+                botReply: text
+            });
+        } catch (e) {
+            console.log("Could not save log");
+        }
 
         res.json({ reply: text });
 
@@ -105,19 +120,12 @@ app.post('/api/chat', async (req, res) => {
     }
 });
 
-app.get('/api/logs', async (req, res) => {
-    const { sessionId } = req.query;
-    let filter = sessionId ? { sessionId: { $regex: sessionId, $options: 'i' } } : {};
-    const logs = await ChatLog.find(filter).sort({ timestamp: -1 });
-    res.json(logs);
-});
-
-app.get('/', (req, res) => {
-    res.send('Server is Ready! API is running at /api/chat');
-});
-
+// --- 2. VERCEL EXPORT ---
+// This is critical for Vercel to run the app
 export default app;
 
+// --- 3. LOCAL START (Fixed Crash) ---
+// This ONLY runs on your computer, never on Vercel
 if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT || 5000;
     app.listen(port, () => {
