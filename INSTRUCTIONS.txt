@@ -1,0 +1,47 @@
+AIRCLOUD STORE - AI CHATBOT INTEGRATION
+=======================================
+
+Thank you for your order! Here is your complete MERN stack Chatbot & Admin Panel.
+
+PREREQUISITES:
+1. Node.js installed (https://nodejs.org/)
+2. MongoDB installed and running locally OR a MongoDB Atlas URI.
+
+---
+
+SECTION 1: SETUP THE BACKEND (Server)
+1. Open the 'server' folder.
+2. Create a file named ".env" and add the following keys:
+   GEMINI_API_KEY=your_google_gemini_key_here
+   MONGO_URI=mongodb://localhost:27017/aircloud_chatbot
+   PORT=5000
+3. Open a terminal in this folder and run:
+   npm install
+   npm start
+   
+   > You should see: "Server running on http://localhost:5000" and "Connected to MongoDB".
+
+---
+
+SECTION 2: SETUP THE FRONTEND (Client)
+1. Open the 'client-react' folder.
+2. Open a terminal in this folder and run:
+   npm install
+   npm run dev
+3. Open the URL shown (usually http://localhost:5173) in your browser.
+
+---
+
+FEATURES INCLUDED:
+1. AI Chat Widget: Bottom-right corner (Customer View).
+2. Admin Panel: Click "Admin Panel" in the top navigation bar.
+   - Manage Products (Add/Edit items for the bot to sell).
+   - View Chat Logs (See conversation history).
+   - Bot Settings (Turn bot ON/OFF, Edit Shipping Policies, System Prompt).
+   - Search & Filter (Find sessions by ID).
+   - GDPR Delete (Remove customer data).
+
+---
+
+NEED HELP?
+If you have any issues running this, please message me on Fiverr!

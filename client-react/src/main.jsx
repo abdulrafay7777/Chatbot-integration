@@ -1,20 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import ChatWidget from './ChatWidget';
+import App from './App'; 
+import './index.css';
 
-const widgetDivId = 'aircloud-chat-widget-root';
-let widgetDiv = document.getElementById(widgetDivId);
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-if (!widgetDiv) {
-  widgetDiv = document.createElement('div');
-  widgetDiv.id = widgetDivId;
-  document.body.appendChild(widgetDiv);
-}
-
-// 2. Mount React into that Div
-const root = ReactDOM.createRoot(widgetDiv);
 root.render(
   <React.StrictMode>
-    <ChatWidget />
+    <App />
   </React.StrictMode>
 );

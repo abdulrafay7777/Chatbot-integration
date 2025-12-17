@@ -1,42 +1,329 @@
-#root {
-  max-width: 1280px;
+.app-container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 40px 20px;
+}
+
+nav {
+  display: flex;
+  gap: 15px;
+  background: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+nav button {
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  color: #555;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+nav button:hover {
+  background-color: #f0f0f0;
+  color: #000;
+}
+
+/* "Store Home" Button */
+nav button:first-child {
+  border: 1px solid #e0e0e0;
+}
+
+/* "Admin Panel" Button */
+nav button:last-child {
+  background-color: #222;
+  color: white;
+  margin-left: auto; /* Pushes button to the right */
+}
+
+nav button:last-child:hover {
+  background-color: #000;
+  transform: translateY(-1px);
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.admin-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Toggle Tabs (Manage Products / Chat Logs) */
+.admin-tabs {
+  display: flex;
+  background: #e9ecef;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.admin-tabs button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  color: #6c757d;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-tabs button:hover {
+  color: #333;
+}
+
+.admin-tabs button.active {
+  background-color: white;
+  color: #007bff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* General Card Style */
+.admin-card {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  margin-bottom: 20px;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group input, 
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus, 
+.form-group textarea:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.save-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 16px;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+  background-color: #218838;
+}
+
+.status-msg {
+  display: block;
+  margin-top: 10px;
   text-align: center;
+  color: #666;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.product-list {
+  display: grid;
+  gap: 15px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.item-card {
+  border: 1px solid #eee;
+  padding: 20px;
+  border-radius: 8px;
+  background: #fafafa;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
-.card {
-  padding: 2em;
+.product-header h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #333;
 }
 
-.read-the-docs {
+.price {
+  font-weight: bold;
+  color: #28a745;
+  background: #e8f5e9;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.logs-view-container {
+  display: flex;
+  height: 600px; /* Fixed height for the dashboard feel */
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+/* --- Left Sidebar (Session List) --- */
+.logs-sidebar {
+  width: 320px;
+  background-color: #f8f9fa;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.logs-sidebar h3 {
+  padding: 20px;
+  margin: 0;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 16px;
+  color: #444;
+}
+
+.session-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.session-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.session-item:hover {
+  background-color: #eee;
+}
+
+.session-item.active {
+  background-color: #e3f2fd;
+  border-left: 4px solid #007bff;
+}
+
+.session-item strong {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.session-item span {
+  font-size: 12px;
   color: #888;
+}
+
+/* --- Right Main Area (Chat History) --- */
+.logs-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0; /* Padding handled inside children */
+  background: #fff;
+}
+
+.logs-main h3 {
+  padding: 20px;
+  margin: 0;
+  border-bottom: 1px solid #eee;
+  font-size: 16px;
+  color: #444;
+  background: #fff;
+}
+
+.chat-history-window {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  background-color: #fff;
+}
+
+/* Individual Messages in History */
+.history-pair {
+  margin-bottom: 30px;
+}
+
+.msg-bubble {
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  max-width: 80%;
+  position: relative;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.msg-bubble .label {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 0.5px;
+}
+
+/* User Message */
+.msg-bubble.user {
+  background-color: #f1f3f5;
+  color: #333;
+  border-bottom-left-radius: 2px;
+}
+
+.msg-bubble.user .label { color: #666; }
+
+/* Bot Message */
+.msg-bubble.bot {
+  background-color: #e3f2fd;
+  color: #0c5460;
+  margin-left: auto; /* Optional: Move bot to right? Usually support stays left. */
+  border: 1px solid #b6e4fc;
+  border-bottom-left-radius: 12px; 
+}
+
+.msg-bubble.bot .label { color: #007bff; }
+
+.timestamp {
+  font-size: 11px;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-style: italic;
+  background-color: #fafafa;
 }

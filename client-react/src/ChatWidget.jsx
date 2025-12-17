@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, X, Send } from 'lucide-react';
 import './widget.css'; 
 
-const API_URL = "https://chatbot-integration-aircloud.vercel.app/api/chat";
-// const API_URI = "http://localhost:5000/api/chat";
+// const API_URL = "https://chatbot-integration-aircloud.vercel.app/api/chat";
+const API_URL = "http://localhost:5000/api/chat";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);

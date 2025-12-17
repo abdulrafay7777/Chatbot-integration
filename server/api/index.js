@@ -5,33 +5,21 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import ChatLog from '../models/ChatLogs.js';
 import Product from '../models/Product.js'; 
+import Settings from '../models/Settings.js'; // Import the new model
 
 dotenv.config();
 const app = express();
 
-// --- CORS CONFIGURATION ---
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://chatbot-integration-client.vercel.app",
-  "https://chatbot-integration-aircloud.vercel.app"
+  "http://localhost:5173", 
+  "http://localhost:5000", 
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); 
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("CORS not allowed"));
-    }
-  },
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type"],
+  origin: allowedOrigins,
+  methods: ["POST", "GET", "DELETE", "PUT"], // Added DELETE and PUT
   credentials: true
 }));
-
-app.options("*", cors());
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -40,13 +28,17 @@ const API_KEY = process.env.GEMINI_API_KEY;
 const MONGO_URI = process.env.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
-    .then(() => console.log("Connected to MongoDB"))
+    .then(() => {
+        console.log("Connected to MongoDB");
+        initializeSettings();
+    })
     .catch(err => console.error("MongoDB Error:", err));
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// --- STATIC KNOWLEDGE ---
-const STATIC_CONTEXT = `
+// --- DEFAULT SETTINGS INITIALIZER ---
+// If no settings exist, create the default one.
+const DEFAULT_CONTEXT = `
 YOU ARE: The Customer Support AI for "AirCloud Store".
 TONE: Professional, polite, UK English.
 ROLE: Assist customers with products, shipping, and returns.
@@ -57,7 +49,32 @@ ROLE: Assist customers with products, shipping, and returns.
 - Issues: Report damaged items within 48h with photos.
 `;
 
+async function initializeSettings() {
+    const exists = await Settings.findOne({ key: 'bot_config' });
+    if (!exists) {
+        await Settings.create({ key: 'bot_config', context: DEFAULT_CONTEXT, isActive: true });
+        console.log("Default settings initialized.");
+    }
+}
+
 // --- ROUTES ---
+
+// 1. GET SETTINGS
+app.get('/api/settings', async (req, res) => {
+    const config = await Settings.findOne({ key: 'bot_config' });
+    res.json(config);
+});
+
+// 2. UPDATE SETTINGS
+app.put('/api/settings', async (req, res) => {
+    const { context, isActive } = req.body;
+    await Settings.findOneAndUpdate(
+        { key: 'bot_config' }, 
+        { context, isActive },
+        { new: true }
+    );
+    res.json({ success: true });
+});
 
 app.post('/api/products', async (req, res) => {
     try {
@@ -74,11 +91,29 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
 });
 
+// 3. DELETE CHAT SESSION (GDPR)
+app.delete('/api/logs/:sessionId', async (req, res) => {
+    try {
+        await ChatLog.deleteMany({ sessionId: req.params.sessionId });
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: "Delete failed" });
+    }
+});
+
 app.post('/api/chat', async (req, res) => {
     const { message, sessionId } = req.body;
     const currentSession = sessionId || "guest";
 
     try {
+        // Fetch Settings Dynamicallly
+        const config = await Settings.findOne({ key: 'bot_config' });
+        
+        // CHECK IF BOT IS DISABLED
+        if (!config || !config.isActive) {
+            return res.json({ reply: "Our AI assistant is currently offline. Please contact human support." });
+        }
+
         const products = await Product.find();
         
         let productListText = "CURRENT PRODUCT INVENTORY:\n";
@@ -86,7 +121,8 @@ app.post('/api/chat', async (req, res) => {
             productListText += `- ${p.name} (${p.price}): ${p.description}\n`;
         });
 
-        const fullPrompt = `${STATIC_CONTEXT}\n\n${productListText}\n\nUSER QUESTION: ${message}`;
+        // Use the context from DB
+        const fullPrompt = `${config.context}\n\n${productListText}\n\nUSER QUESTION: ${message}`;
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         const result = await model.generateContent(fullPrompt);
@@ -120,8 +156,8 @@ app.get('/', (req, res) => {
 export default app;
 
 if (process.env.NODE_ENV !== 'production') {
-  const port = process.env.PORT || 5000;
-  app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-  });
+    const port = process.env.PORT || 5000;
+    app.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
 }
