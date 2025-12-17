@@ -17,18 +17,8 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-
-    if (
-      origin === "https://chatbot-integration-client.vercel.app" || 
-      origin.includes(".vercel.app")
-    ) {
-      return callback(null, true);
-    }
-
-    return callback(null, true); 
-  },
+  origin: "https://chatbot-integration-client.vercel.app",
+  methods: ["POST", "GET"],
   credentials: true
 }));
 
