@@ -17,10 +17,19 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: "https://chatbot-integration-client.vercel.app",
-  methods: ["POST", "GET"],
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ["POST", "GET", "OPTIONS"], 
   credentials: true
 }));
+
 
 app.use(express.json());
 app.use(express.static('public'));
