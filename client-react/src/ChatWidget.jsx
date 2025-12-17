@@ -12,7 +12,6 @@ export default function ChatWidget() {
   const [sessionId, setSessionId] = useState("");
   const messagesEndRef = useRef(null);
 
-  // 1. Generate Session ID on mount
   useEffect(() => {
     let storedId = sessionStorage.getItem("aircloud_session");
     if (!storedId) {
@@ -21,11 +20,9 @@ export default function ChatWidget() {
     }
     setSessionId(storedId);
     
-    // Add initial greeting
     setMessages([{ sender: 'bot', text: "Hi! I'm the AirCloud Assistant. How can I help you today?" }]);
   }, []);
 
-  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isOpen]);
@@ -53,7 +50,6 @@ export default function ChatWidget() {
 
   return (
     <div className="aircloud-widget-container">
-      {/* 1. The Toggle Button */}
       <button 
         className={`aircloud-toggle ${isOpen ? 'hidden' : ''}`}
         onClick={() => setIsOpen(true)}
@@ -61,7 +57,6 @@ export default function ChatWidget() {
         <MessageCircle size={28} />
       </button>
 
-      {/* 2. The Chat Window */}
       {isOpen && (
         <div className="aircloud-window">
           <div className="aircloud-header">
